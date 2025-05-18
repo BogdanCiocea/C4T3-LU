@@ -30,12 +30,22 @@ const int Stop          = 0;                                // stop
 const int Contrarotate  = 172;                              // Counterclockwise rotation
 const int Clockwise     = 83;
 
+// void // my_delay(int time) {
+//   int time_now = millis();
+
+//   while(millis() < time_now + time);
+// }
+
 void setup() {
-  Serial.begin(9600);  // Match the baud rate to the ESP8266
+  /*
+   * Match the baud rate to the ESP8266
+   */
+  Serial.begin(9600);
 
   myservo.attach(servo_PIN);
 	myservo.write(SERVO_ANGLE);
 	delay(100);
+  // my_delay(100);
 
   pinMode(SHCP_PIN, OUTPUT);
   pinMode(EN_PIN, OUTPUT);
@@ -45,9 +55,15 @@ void setup() {
   pinMode(PWM2_PIN, OUTPUT);
 }
 
-char lastCommand = 'S';
-
-#define DANCE 400
+bool is_legit(char command) {
+  if (command == 'F' || command == 'B' || 
+      command == 'L' || command == 'R' || 
+      command == 'Y' || command == 'U' || 
+      command == 'v' || command == 'c')
+      return true;
+  
+  return false;
+}
 
 void loop() {
   if (Serial.available()) {
@@ -56,42 +72,54 @@ void loop() {
   }
 }
 
+/*
+ * Function that takes a command and, based on that,
+ * makes the robot move
+ */
 void controlMotor(char command) {
   switch (command) {
     case 'F':
       Motor(Forward, 255);
+      // my_delay(DELAY);
       delay(DELAY);
       break;
     case 'B':
       Motor(Backward, 255);
+      // my_delay(DELAY);
       delay(DELAY);
       break;
     case 'L':
       Motor(Contrarotate, 255);
+      // my_delay(DELAY - 5);
       delay(DELAY - 5);
       break;
     case 'R':
       Motor(Clockwise, 255);
       delay(DELAY - 5);
+      // my_delay(DELAY - 5);
       break;
-    case 'D':
-      dance();
+    case 'S':
+      // dance();
       break;
     case 'Y':
       Motor(Top_Right, 255);
+      // my_delay(DELAY);
       delay(DELAY);
       break;
     case 'U':
       Motor(Top_Left, 255);
       delay(DELAY);
+      // my_delay(DELAY);
       break;
     case 'V':
       Motor(Bottom_Right, 255);
       delay(DELAY);
+      // my_delay(DELAY);
       break;
     case 'C':
       Motor(Bottom_Left, 255);
       delay(DELAY);
+      // my_delay(DELAY);
       break;
     default:
       Motor(Stop, 0);
@@ -99,62 +127,9 @@ void controlMotor(char command) {
   }  
 }
 
-void nuh_uh(bool slowed)
-{
-  int time = 250;
-  int rotations = 3;
-  if (slowed) {
-    time = 500;
-    rotations = 4;
-  }
-  for (int i = 0; i < rotations; i++)
-  {
-    myservo.write(-SERVO_ANGLE);
-    delay(time);
-    myservo.write(200 + SERVO_ANGLE);
-    delay(time);
-  }
-  if (slowed) {
-    myservo.write(SERVO_ANGLE);
-    delay(time);
-  }
-	myservo.write(SERVO_ANGLE);
-}
-
-void dance() {
-
-  myservo.write(SERVO_ANGLE);
-  delay(250);
-
-  for (int i = 0; i < 2; i++) {
-    Motor(Top_Left, 255);
-    delay(DANCE);
-  
-    Motor(Bottom_Right, 255);
-    delay(DANCE);
-  }
-
-  for (int i = 0; i < 2; i++) {
-    Motor(Top_Right, 255);
-    delay(DANCE);
-
-    Motor(Bottom_Left, 255);
-    delay(DANCE);
-  }
-
-  Motor(Contrarotate, 255);
-  delay(1320);
-
-  Motor(Clockwise, 255);
-  delay(1320);
-
-  myservo.write(SERVO_ANGLE);
-  delay(250);
-
-  Motor(Stop, 0);
-  nuh_uh(1);
-}
-
+/*
+ * Function that makes each motor move
+ */
 void Motor(int Dir, int Speed)
 {
     digitalWrite(EN_PIN, LOW);
