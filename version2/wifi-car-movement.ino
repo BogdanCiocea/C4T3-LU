@@ -54,11 +54,9 @@ void loop() {
 
   if (Serial.available()) {
     char cmd = (char)Serial.read();
-    if (is_legit(cmd)) {
-      applyCommand(cmd);
-      motorTimer.start();
-      motorActive = true;
-    }
+    applyCommand(cmd);
+    motorTimer.start();
+    motorActive = true;
   }
 
   if (motorActive && motorTimer.waiting()) {
