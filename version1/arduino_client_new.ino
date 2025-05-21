@@ -19,12 +19,6 @@ const float MAX_THRESHOLD = 2.0;
 
 int select_count = 0;
 
-void my_delay(int time) {
-  int time_now = millis();
-
-  while(millis() < time_now + time);
-}
-
 int read_LCD_buttons() {
   int adc_key_in = analogRead(0);
   if (adc_key_in > 1000) return btnNONE;
@@ -46,7 +40,6 @@ void check_mode() {
   while (true) {
     int buttons = read_LCD_buttons();
     delay(10);
-    // my_delay(10);
     if (buttons == btnLEFT) {
       arm = true;
       break;
@@ -83,17 +76,13 @@ void loop() {
      */
     float x = Accelerometer.readX();
     delay(10);
-    // my_delay(10);
     float y = Accelerometer.readY();
     delay(10);
-    // my_delay(10);
     float z = Accelerometer.readZ();
     delay(10);
-    // my_delay(10);
 
     int buttonState = read_LCD_buttons();
     delay(10);
-    // my_delay(10);
 
     if (buttonState == btnSELECT) {
       select_count++;
@@ -142,12 +131,12 @@ void loop() {
     }
 
     delay(75);
-    // my_delay(75);
-    // BUTTONS
   } else if (keys) {
+    /**
+     * Detect button press
+     */
     int buttonState = read_LCD_buttons();
     delay(10);
-    // my_delay(10);
     /*
      * Same thing but with buttons now
      */
@@ -156,41 +145,27 @@ void loop() {
         Serial.println("F");
         lcd.setCursor(2, 0);
         lcd.print("CHAAAAARGE!!");
-        // Serial.flush();
-        // buttonState = read_LCD_buttons();
         delay(100);
-        // my_delay(100);
       } else if (buttonState == btnRIGHT) {
         Serial.println("R");
         lcd.setCursor(5, 0);
         lcd.print("RIGHT");
-        // Serial.flush();
-        // buttonState = read_LCD_buttons();
         delay(100);
-        // my_delay(100);
       } else if (buttonState == btnLEFT) {
         Serial.println("L");
         lcd.setCursor(5, 0);
         lcd.print("LEFT");
-        // Serial.flush();
-        // buttonState = read_LCD_buttons();
         delay(100);
-        // my_delay(100);
       } else if (buttonState == btnDOWN) {
         Serial.println("B");
         Serial.flush();
         lcd.setCursor(3, 0);
         lcd.print("BACKWARDS");
-        // Serial.flush();
-        // buttonState = read_LCD_buttons();
         delay(100);
-        // my_delay(100);
       } else if (buttonState == btnSELECT) {
         Serial.println("Z");
         lcd.setCursor(3, 0);
         lcd.print("Set bomb");
-        // Serial.flush();
-        // buttonState = read_LCD_buttons();
         delay(100);
       }
     }
