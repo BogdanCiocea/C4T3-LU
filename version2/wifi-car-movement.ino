@@ -34,6 +34,7 @@ Servo myservo;
 
 Neotimer motorTimer(DELAY);
 bool motorActive = false;
+const char myCommands[] = {'F', 'B', 'L', 'R', 'Y', 'U', 'V', 'C'};
 
 void setup() {
   Serial.begin(9600);
@@ -47,22 +48,34 @@ void setup() {
   pinMode(PWM1_PIN, OUTPUT);
   pinMode(PWM2_PIN, OUTPUT);
 
-  motorTimer.start();
+  Serial.println("Motors are active");
 }
 
 void loop() {
 
   if (Serial.available()) {
     char cmd = (char)Serial.read();
+    Serial.println(cmd);
     applyCommand(cmd);
-    motorTimer.start();
-    motorActive = true;
+    if (isValid(cmd)) {
+      motorTimer.start();
+      motorActive = true;
+    }
   }
 
   if (motorActive && motorTimer.waiting()) {
     Motor(Stop, 0);
     motorActive = false;
   }
+}
+
+bool isValid(char command) {
+  for (char c : myCommands) {
+    if (command == c)
+      return true;
+  }
+
+  return false;
 }
 
 void applyCommand(char command) {

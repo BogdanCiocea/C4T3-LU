@@ -14,10 +14,11 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #define COUNT 3
 const float MIN_THRESHOLD = 0.7;
 const unsigned long long TIMER_DELAY = 100;
+const char* msg = nullptr;
 
 int select_count = 0;
 
-Neotimer sensorTimer(10);
+Neotimer sensorTimer(100);
 Neotimer actionTimer(75);
 Neotimer keysTimer(100);
 
@@ -54,7 +55,6 @@ void setup() {
   Serial.begin(9600);
   Accelerometer.begin();
   check_mode();
-  lcd.print("Connecting...");
   
   sensorTimer.start();
   actionTimer.start();
@@ -62,8 +62,6 @@ void setup() {
 }
 
 void loop() {
-  lcd.clear();
-
   if (arm) {
     float x, y, z;
     if (sensorTimer.done()) {
@@ -80,57 +78,57 @@ void loop() {
         select_count++;
     }
 
+    msg = nullptr;
+
     if (select_count >= COUNT) {
       select_count = 0;
       Serial.println("Z");
+      msg = "Set bomb";
     } else if (actionTimer.done()) {
       actionTimer.start();
 
-      if (x <= -MIN_THRESHOLD && y <= -MIN_THRESHOLD) {
-        Serial.println("Y"); lcd.setCursor(4,0); lcd.print("UP-RIGHT");
-      } else if (x >=  MIN_THRESHOLD && y <= -MIN_THRESHOLD) {
-        Serial.println("U"); lcd.setCursor(4,0); lcd.print("UP-LEFT");
-      } else if (x <= -MIN_THRESHOLD && y >=  MIN_THRESHOLD) {
-        Serial.println("V"); lcd.setCursor(4,0); lcd.print("DOWN-RIGHT");
-      } else if (x >=  MIN_THRESHOLD && y >=  MIN_THRESHOLD) {
-        Serial.println("C"); lcd.setCursor(4,0); lcd.print("DOWN-LEFT");
-      } else if (x <= -MIN_THRESHOLD) {
-        Serial.println("R"); lcd.setCursor(5,0); lcd.print("RIGHT");
-      } else if (x >=  MIN_THRESHOLD) {
-        Serial.println("L"); lcd.setCursor(5,0); lcd.print("LEFT");
+      if (x <= -MIN_THRESHOLD + 0.48 && y <= -MIN_THRESHOLD) {
+        Serial.println("Y"); msg = "UP-RIGHT";
+      } else if (x >= MIN_THRESHOLD - 0.5 && y <= -MIN_THRESHOLD) {
+        Serial.println("U"); msg = "UP-LEFT";
+      } else if (x <= -MIN_THRESHOLD + 0.8 && y >= MIN_THRESHOLD) {
+        Serial.println("V"); msg = "DOWN-RIGHT";
+      } else if (x >=  MIN_THRESHOLD - 0.15 && y >= MIN_THRESHOLD) {
+        Serial.println("C"); msg = "DOWN-LEFT";
+      } else if (x <= -MIN_THRESHOLD + 0.2 && y > -MIN_THRESHOLD) {
+        Serial.println("R"); msg = "RIGHT";
+      } else if (x >=  MIN_THRESHOLD + 0.1) {
+        Serial.println("L"); msg = "LEFT";
       } else if (y <= -MIN_THRESHOLD) {
-        Serial.println("F"); lcd.setCursor(2,0); lcd.print("CHAAAAARGE!!");
-      } else if (y >=  MIN_THRESHOLD) {
-        Serial.println("B"); lcd.setCursor(3,0); lcd.print("BACKWARDS");
+        Serial.println("F"); msg = "CHAAAAARGE!!";
+      } else if (y >= MIN_THRESHOLD) {
+        Serial.println("B"); msg = "BACKWARDS";
       }
+
+      lcd.clear();
     }
   } else if (keys) {
     if (keysTimer.done()) {
       keysTimer.start();
       int bs = read_LCD_buttons();
-        switch (bs) {
-          case btnUP:
-            Serial.println("F");
-            lcd.setCursor(2,0); lcd.print("CHAAAAARGE!!");
-            break;
-          case btnRIGHT:
-            Serial.println("R");
-            lcd.setCursor(5,0); lcd.print("RIGHT");
-            break;
-          case btnLEFT:
-            Serial.println("L");
-            lcd.setCursor(5,0); lcd.print("LEFT");
-            break;
-          case btnDOWN:
-            Serial.println("B");
-            lcd.setCursor(3,0); lcd.print("BACKWARDS");
-            break;
-          case btnSELECT:
-            Serial.println("Z");
-            lcd.setCursor(3,0); lcd.print("Set bomb");
-            select_count++;
-            break;
+
+      if (bs == btnNONE) {
+        lcd.clear();
+      }
+
+      msg = nullptr;
+      switch (bs) {
+        case btnUP: Serial.println("F"); msg = "CHAAAAARGE!!"; break;
+        case btnRIGHT: Serial.println("R"); msg = "RIGHT"; break;
+        case btnLEFT: Serial.println("L"); msg = "LEFT"; break;
+        case btnDOWN: Serial.println("B"); msg = "BACKWARDS"; break;
+        case btnSELECT: Serial.println("Z"); msg = "Set bomb"; select_count++; break;
       }
     }
+  }
+
+  if (msg) {
+    lcd.setCursor((16 - strlen(msg)) / 2, 0);
+    lcd.print(msg);
   }
 }
