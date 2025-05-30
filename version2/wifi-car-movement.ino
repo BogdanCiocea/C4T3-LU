@@ -1,4 +1,3 @@
-#include <Servo.h>
 #include <stdbool.h>
 #include <Arduino_PMIC.h>
 #include <neotimer.h>
@@ -30,17 +29,11 @@ const int Stop          = 0;                                // stop
 const int Contrarotate  = 172;                              // Counterclockwise rotation
 const int Clockwise     = 83;
 
-Servo myservo;
-
-Neotimer motorTimer(DELAY);
-bool motorActive = false;
-const char myCommands[] = {'F', 'B', 'L', 'R', 'Y', 'U', 'V', 'C'};
+Neotimer dataTimer(10);
+Neotimer driveTimer(150);
 
 void setup() {
   Serial.begin(9600);
-  myservo.attach(servo_PIN);
-  myservo.write(SERVO_ANGLE);
-
   pinMode(SHCP_PIN, OUTPUT);
   pinMode(EN_PIN, OUTPUT);
   pinMode(DATA_PIN, OUTPUT);
@@ -49,35 +42,41 @@ void setup() {
   pinMode(PWM2_PIN, OUTPUT);
 
   Serial.println("Motors are active");
+
+  dataTimer.start();
+  driveTimer.start();
 }
+
+char cmd = "";
 
 void loop() {
-
-  if (Serial.available()) {
-    char cmd = (char)Serial.read();
-    Serial.println(cmd);
-    applyCommand(cmd);
-    if (isValid(cmd)) {
-      motorTimer.start();
-      motorActive = true;
+  /**
+   * A delay mechanism for data timer which takes
+   * the input from serial
+   */
+  if (dataTimer.done()) {
+    if (Serial.available()) {
+      cmd = Serial.read();
+      Serial.println(cmd);
     }
+    dataTimer.start();
   }
 
-  if (motorActive && motorTimer.waiting()) {
-    Motor(Stop, 0);
-    motorActive = false;
+  /**
+   * Apply the command if the timer is available
+   */
+  if (driveTimer.waiting()) {
+    applyCommand(cmd);
+  }
+
+  if (driveTimer.done()) {
+    driveTimer.start();
   }
 }
 
-bool isValid(char command) {
-  for (char c : myCommands) {
-    if (command == c)
-      return true;
-  }
-
-  return false;
-}
-
+/**
+ * Handler for commands
+ */
 void applyCommand(char command) {
   switch (command) {
     case 'F':  Motor(Forward, 255); break;
@@ -92,6 +91,9 @@ void applyCommand(char command) {
   }
 }
 
+/** 
+ * Function which tells 74HC595 how to move
+ */
 void Motor(int Dir, int Speed) {
   digitalWrite(EN_PIN, LOW);
   analogWrite(PWM1_PIN, Speed);

@@ -61,44 +61,16 @@ void loop() {
  */
 void controlMotor(char command) {
   switch (command) {
-    case 'F':
-      Motor(Forward, 255);
-      delay(DELAY);
-      break;
-    case 'B':
-      Motor(Backward, 255);
-      delay(DELAY);
-      break;
-    case 'L':
-      Motor(Contrarotate, 255);
-      delay(DELAY - 5);
-      break;
-    case 'R':
-      Motor(Clockwise, 255);
-      delay(DELAY - 5);
-      break;
-    case 'S':
-      // dance();
-      break;
-    case 'Y':
-      Motor(Top_Right, 255);
-      delay(DELAY);
-      break;
-    case 'U':
-      Motor(Top_Left, 255);
-      delay(DELAY);
-      break;
-    case 'V':
-      Motor(Bottom_Right, 255);
-      delay(DELAY);
-      break;
-    case 'C':
-      Motor(Bottom_Left, 255);
-      delay(DELAY);
-      break;
-    default:
-      Motor(Stop, 0);
-      break;
+    case 'F': Motor(Forward, 255); delay(DELAY); break;
+    case 'B': Motor(Backward, 255); delay(DELAY); break;
+    case 'L': Motor(Contrarotate, 255); delay(DELAY - 5); break;
+    case 'R': Motor(Clockwise, 255); delay(DELAY - 5); break;
+    case 'S': break;
+    case 'Y': Motor(Top_Right, 255); delay(DELAY); break;
+    case 'U': Motor(Top_Left, 255); delay(DELAY); break;
+    case 'V': Motor(Bottom_Right, 255); delay(DELAY); break;
+    case 'C': Motor(Bottom_Left, 255); delay(DELAY); break;
+    default: Motor(Stop, 0); break;
   }
 }
 
