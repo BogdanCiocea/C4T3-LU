@@ -65,11 +65,8 @@ void loop() {
   /**
    * Apply the command if the timer is available
    */
-  if (driveTimer.waiting()) {
-    applyCommand(cmd);
-  }
-
   if (driveTimer.done()) {
+    applyCommand(cmd);
     driveTimer.start();
   }
 }
